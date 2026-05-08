@@ -109,7 +109,7 @@ export default function App() {
 
     try {
       // Convert all images to base64
-      const imageContents = await Promise.all(
+      const images = await Promise.all(
         imageFiles.map(async (file) => {
           const base64 = await new Promise((res, rej) => {
             const r = new FileReader();
@@ -117,7 +117,7 @@ export default function App() {
             r.onerror = rej;
             r.readAsDataURL(file);
           });
-          return { type: "image", source: { type: "base64", media_type: file.type || "image/jpeg", data: base64 } };
+          return { mediaType: file.type || "image/jpeg", data: base64 };
         })
       );
 
@@ -138,19 +138,7 @@ Si no hay descripción o no puedes inferir, deja qty:0.` : "";
         ? `\nSon ${imageFiles.length} fotos de la MISMA boleta. Combina todos los ítems en un solo JSON unificado, sin duplicar ítems que aparezcan en más de una foto.`
         : "";
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 2000,
-          messages: [{
-            role: "user",
-            content: [
-              ...imageContents,
-              {
-                type: "text",
-                text: `Analiza esta boleta de restaurante. Responde SOLO con JSON exacto, sin backticks ni texto adicional.${multiHint}
+      const prompt = `Analiza esta boleta de restaurante. Responde SOLO con JSON exacto, sin backticks ni texto adicional.${multiHint}
 
 {
   "restaurant": "nombre o null",
@@ -175,17 +163,18 @@ Reglas:
 - Extrae TODOS los ítems sin excepción
 - consumoTotal = suma de todos los subtotales
 - mySelection.qty por defecto: igual al qty del ítem (pre-seleccionar todo)
-- mySelection.splitBy por defecto: 1${descSection}`
-              }
-            ]
-          }]
-        })
+- mySelection.splitBy por defecto: 1${descSection}`;
+
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images, prompt }),
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || `HTTP ${response.status}`);
+      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
 
-      const text = data.content?.find((b) => b.type === "text")?.text || "";
+      const text = data.text || "";
       const parsed = JSON.parse(text.replace(/```json|```/gi, "").trim());
 
       setBillData(parsed);
