@@ -748,7 +748,6 @@ Reglas:
             <h2 className="text-lg font-bold text-gray-900">Resumen final</h2>
 
             <div className="space-y-3">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Tus ítems</p>
               {Object.entries(selectedItems).map(([i, sel]) => {
                 const item = billData.items[+i];
                 const perItem = getItemContribution(item, sel);
@@ -847,10 +846,6 @@ Reglas:
                 ? <><Check className="w-5 h-5" />Copiado al portapapeles</>
                 : <><Share2 className="w-5 h-5" />Compartir resumen</>}
             </button>
-            <p className="text-xs text-center text-gray-400 -mt-2">
-              Abre el menú nativo de iOS · WhatsApp, iMessage y más
-            </p>
-
             {/* Fallback: show text to copy manually — always fresh */}
             {shareText !== null && (
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
