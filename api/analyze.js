@@ -7,6 +7,8 @@ export default async function handler(req, res) {
   if (!apiKey) {
     return res.status(500).json({ error: "OPENROUTER_API_KEY not configured" });
   }
+  // debug temporal — eliminar después
+  console.log("[analyze] key prefix:", apiKey.slice(0, 10), "len:", apiKey.length);
 
   const { images, prompt } = req.body;
 
