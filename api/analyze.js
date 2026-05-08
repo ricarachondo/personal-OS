@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       "X-Title": "Splitr",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.0-flash-exp:free",
+      model: "baidu/qianfan-ocr-fast:free",
       messages: [{ role: "user", content }],
       max_tokens: 2000,
       temperature: 0.1,
