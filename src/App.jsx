@@ -1,6 +1,6 @@
 // v6 - single upload button + mic input
 import { useState, useRef } from "react";
-import { Camera, ArrowLeft, Check, Plus, Minus, Home, X, FileImage, Images, Share2, Mic } from "lucide-react";
+import { Camera, ArrowLeft, Check, Plus, Minus, Home, X, FileImage, Images, Share2, Mic, RefreshCw } from "lucide-react";
 
 const formatCLP = (n) => "$" + Math.round(n).toLocaleString("es-CL");
 
@@ -23,6 +23,7 @@ export default function App() {
   const [isListening, setIsListening] = useState(false);
   const [micLocked, setMicLocked] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -99,7 +100,11 @@ export default function App() {
   };
 
   const removeImage = (idx) => {
-    setImageFiles((prev) => prev.filter((_, i) => i !== idx));
+    setImageFiles((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      if (next.length === 0) setUserDescription("");
+      return next;
+    });
   };
 
   // ── analyze ───────────────────────────────────────────────────────────────────
@@ -311,7 +316,14 @@ Reglas:
   const resetApp = () => {
     setStep("upload"); setImageFiles([]); setUserDescription(""); setBillData(null);
     setSelectedItems({}); setSplitOpen({}); setTipPercentage(10); setCustomTip("");
-    setGlobalSplit(1); setError(null); setAnalyzing(false); setShareStatus(null); setShareText(null); setShowImageSheet(false); setIsListening(false); setMicLocked(false);
+    setGlobalSplit(1); setError(null); setAnalyzing(false); setShareStatus(null);
+    setShareText(null); setShowImageSheet(false); setIsListening(false); setMicLocked(false);
+    setShowResetModal(false);
+  };
+
+  const handleBackFromSelection = () => {
+    if (billData) setShowResetModal(true);
+    else setStep("upload");
   };
 
   // ── item controls component ───────────────────────────────────────────────────
@@ -459,7 +471,7 @@ Reglas:
       <div className="bg-blue-600 text-white px-4 py-3 shadow-md flex items-center gap-3 sticky top-0 z-40">
         {(step === "selection" || step === "summary") ? (
           <button
-            onClick={() => step === "summary" ? setStep("selection") : setStep("upload")}
+            onClick={() => step === "summary" ? setStep("selection") : handleBackFromSelection()}
             className="p-1.5 rounded-lg hover:bg-blue-500 transition-colors flex-shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -468,7 +480,12 @@ Reglas:
           <h1 className="text-lg font-bold tracking-tight leading-none">Splitr</h1>
           <p className="text-xs text-blue-200 mt-0.5">La cuenta, resuelta.</p>
         </div>
-        <div className="w-8" />
+        {step === "upload" && billData ? (
+          <button onClick={() => setShowResetModal(true)}
+            className="p-1.5 rounded-lg hover:bg-blue-500 transition-colors flex-shrink-0 opacity-70 hover:opacity-100">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        ) : <div className="w-8" />}
       </div>
 
       <StepIndicator />
@@ -865,6 +882,35 @@ Reglas:
           </div>
         )}
       </div>
+
+      {/* RESET MODAL */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowResetModal(false)} />
+          <div className="relative bg-white w-full max-w-lg rounded-t-3xl p-6 space-y-4 shadow-xl">
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto -mt-1 mb-2" />
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <RefreshCw className="w-6 h-6 text-blue-500" />
+              </div>
+              <h3 className="text-base font-bold text-gray-900">¿Qué quieres hacer?</h3>
+              <p className="text-sm text-gray-500 mt-1">Tienes una boleta ya analizada</p>
+            </div>
+            <button onClick={() => { setShowResetModal(false); setStep("upload"); }}
+              className="w-full py-3.5 rounded-2xl border-2 border-blue-200 bg-blue-50 text-blue-700 font-semibold text-sm">
+              Volver a editar la misma boleta
+            </button>
+            <button onClick={resetApp}
+              className="w-full py-3.5 rounded-2xl bg-gray-900 text-white font-semibold text-sm">
+              Empezar de cero
+            </button>
+            <button onClick={() => setShowResetModal(false)}
+              className="w-full py-2 text-sm text-gray-400">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* TOAST */}
       {toast && (

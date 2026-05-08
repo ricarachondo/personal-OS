@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Prevent mobile browser zoom on input focus */
+input, textarea, select {
+  font-size: max(16px, 1em);
+}
