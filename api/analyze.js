@@ -3,12 +3,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
   if (!apiKey) {
     return res.status(500).json({ error: "OPENROUTER_API_KEY not configured" });
   }
-  // debug temporal — eliminar después
-  console.log("[analyze] key prefix:", apiKey.slice(0, 10), "len:", apiKey.length);
 
   const { images, prompt } = req.body;
 
