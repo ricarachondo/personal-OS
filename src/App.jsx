@@ -15,6 +15,7 @@ export default function App() {
   const [customTip, setCustomTip] = useState("");
   const [globalSplit, setGlobalSplit] = useState(1);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [shareStatus, setShareStatus] = useState(null);
   const [shareText, setShareText] = useState(null);
@@ -197,7 +198,10 @@ Reglas:
       if (parsed.tipPct) { setTipPercentage(parsed.tipPct); setCustomTip(""); }
       setStep("selection");
     } catch (err) {
+      console.error("[Splitr] analyze error:", err);
       setError(err.message);
+      setToast(true);
+      setTimeout(() => setToast(false), 4000);
     } finally {
       setAnalyzing(false);
     }
@@ -535,7 +539,7 @@ Reglas:
                       <textarea value={userDescription} onChange={(e) => setUserDescription(e.target.value)}
                         placeholder="Ej: un schop, un completo italiano y unas papas a medias..."
                         className="w-full px-3 py-2.5 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
-                        rows={2} />
+                        rows={4} />
                       {/* Mic button — WhatsApp style */}
                       <button
                         onMouseDown={handleMicDown}
@@ -590,11 +594,6 @@ Reglas:
               </>
             )}
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-                <p className="text-red-700 text-sm font-medium">⚠️ {error}</p>
-              </div>
-            )}
           </div>
         )}
 
@@ -871,6 +870,13 @@ Reglas:
           </div>
         )}
       </div>
+
+      {/* TOAST */}
+      {toast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-pulse">
+          ¡Oops! Ocurrió un error
+        </div>
+      )}
 
       {/* BOTTOM NAV */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
