@@ -1,19 +1,14 @@
-export const config = { runtime: "edge" };
-
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: "OPENROUTER_API_KEY not configured" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return res.status(500).json({ error: "OPENROUTER_API_KEY not configured" });
   }
 
-  const { images, prompt } = await req.json();
+  const { images, prompt } = req.body;
 
   const content = [
     ...images.map((img) => ({
@@ -23,7 +18,7 @@ export default async function handler(req) {
     { type: "text", text: prompt },
   ];
 
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -39,17 +34,13 @@ export default async function handler(req) {
     }),
   });
 
-  const data = await res.json();
+  const data = await upstream.json();
 
-  if (!res.ok) {
-    return new Response(JSON.stringify({ error: data.error?.message || `OpenRouter error ${res.status}` }), {
-      status: res.status,
-      headers: { "Content-Type": "application/json" },
-    });
+  if (!upstream.ok) {
+    console.error("[analyze] OpenRouter error:", JSON.stringify(data));
+    return res.status(upstream.status).json({ error: data.error?.message || `OpenRouter error ${upstream.status}` });
   }
 
   const text = data.choices?.[0]?.message?.content ?? "";
-  return new Response(JSON.stringify({ text }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return res.status(200).json({ text });
 }
