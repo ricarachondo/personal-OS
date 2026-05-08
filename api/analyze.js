@@ -5,9 +5,9 @@ export default async function handler(req) {
     return new Response("Method not allowed", { status: 405 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: "GEMINI_API_KEY not configured" }), {
+    return new Response(JSON.stringify({ error: "OPENROUTER_API_KEY not configured" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
@@ -15,35 +15,40 @@ export default async function handler(req) {
 
   const { images, prompt } = await req.json();
 
-  const parts = [
+  const content = [
     ...images.map((img) => ({
-      inline_data: { mime_type: img.mediaType, data: img.data },
+      type: "image_url",
+      image_url: { url: `data:${img.mediaType};base64,${img.data}` },
     })),
-    { text: prompt },
+    { type: "text", text: prompt },
   ];
 
-  const geminiRes = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts }],
-        generationConfig: { maxOutputTokens: 2000, temperature: 0.1 },
-      }),
-    }
-  );
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+      "HTTP-Referer": "https://splitr-boleta.vercel.app",
+      "X-Title": "Splitr",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.0-flash-exp:free",
+      messages: [{ role: "user", content }],
+      max_tokens: 2000,
+      temperature: 0.1,
+    }),
+  });
 
-  const data = await geminiRes.json();
+  const data = await res.json();
 
-  if (!geminiRes.ok) {
-    return new Response(JSON.stringify({ error: data.error?.message || `Gemini error ${geminiRes.status}` }), {
-      status: geminiRes.status,
+  if (!res.ok) {
+    return new Response(JSON.stringify({ error: data.error?.message || `OpenRouter error ${res.status}` }), {
+      status: res.status,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  const text = data.choices?.[0]?.message?.content ?? "";
   return new Response(JSON.stringify({ text }), {
     headers: { "Content-Type": "application/json" },
   });

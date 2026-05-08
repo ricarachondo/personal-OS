@@ -873,7 +873,8 @@ Reglas:
 
       {/* TOAST */}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-2xl shadow-xl animate-pulse">
+        <div style={{ backgroundColor: "rgb(255,127,127)" }}
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 border border-red-400 text-red-900 text-sm font-semibold px-5 py-3 rounded-2xl shadow-lg">
           ¡Oops! Ocurrió un error
         </div>
       )}
