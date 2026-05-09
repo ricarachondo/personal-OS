@@ -24,6 +24,13 @@ export default function App() {
   const [micLocked, setMicLocked] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = (action) => {
+    setRefreshing(true);
+    action();
+    setTimeout(() => setRefreshing(false), 600);
+  };
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -177,8 +184,12 @@ Reglas:
         body: JSON.stringify({ images, prompt }),
       });
 
+      if (!response.ok) {
+        let msg = `HTTP ${response.status}`;
+        try { const d = await response.json(); msg = d.error || msg; } catch {}
+        throw new Error(msg);
+      }
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
 
       const text = data.text || "";
       const parsed = JSON.parse(text.replace(/```json|```/gi, "").trim());
@@ -319,6 +330,8 @@ Reglas:
     setGlobalSplit(1); setError(null); setAnalyzing(false); setShareStatus(null);
     setShareText(null); setShowImageSheet(false); setIsListening(false); setMicLocked(false);
     setShowResetModal(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
   };
 
   const handleBackFromSelection = () => {
@@ -480,10 +493,15 @@ Reglas:
           <h1 className="text-lg font-bold tracking-tight leading-none">Splitr</h1>
           <p className="text-xs text-blue-200 mt-0.5">La cuenta, resuelta.</p>
         </div>
-        {step === "upload" && billData ? (
-          <button onClick={() => setShowResetModal(true)}
+        {step === "upload" && (billData || imageFiles.length > 0) ? (
+          <button onClick={() => handleRefresh(billData ? () => setShowResetModal(true) : resetApp)}
             className="p-1.5 rounded-lg hover:bg-blue-500 transition-colors flex-shrink-0 opacity-70 hover:opacity-100">
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "spin-once" : ""}`} />
+          </button>
+        ) : step === "selection" ? (
+          <button onClick={() => handleRefresh(() => setSelectedItems({}))}
+            className="p-1.5 rounded-lg hover:bg-blue-500 transition-colors flex-shrink-0 opacity-70 hover:opacity-100">
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "spin-once" : ""}`} />
           </button>
         ) : <div className="w-8" />}
       </div>
@@ -553,7 +571,7 @@ Reglas:
                     </div>
                   ) : (
                     <div className="relative">
-                      <textarea value={userDescription} onChange={(e) => setUserDescription(e.target.value)}
+                      <textarea value={userDescription} onChange={(e) => { setUserDescription(e.target.value); if (error) { setError(null); setToast(false); } }}
                         placeholder="Ej: un schop, un completo italiano y unas papas a medias..."
                         className="w-full px-3 py-2.5 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
                         rows={4} />
@@ -915,15 +933,15 @@ Reglas:
       {/* TOAST */}
       {toast && (
         <div style={{ backgroundColor: "rgb(255,127,127)" }}
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 border border-red-400 text-red-900 text-sm font-semibold px-5 py-3 rounded-2xl shadow-lg">
-          ¡Oops! Ocurrió un error
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 border border-red-400 text-red-900 text-sm font-semibold px-5 py-3 rounded-2xl shadow-lg text-center">
+          ¡Oops!<br/>{error || "Ocurrió un error"}
         </div>
       )}
 
       {/* BOTTOM NAV */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
         <div className="max-w-lg mx-auto flex items-center justify-center px-6 py-3">
-          <button onClick={resetApp}
+          <button onClick={() => handleRefresh(billData ? () => setShowResetModal(true) : resetApp)}
             className="flex flex-col items-center gap-1 px-8 py-1 rounded-xl text-blue-600 hover:bg-blue-50 transition-colors">
             <Home className="w-6 h-6" />
             <span className="text-xs font-semibold">Inicio</span>
