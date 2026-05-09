@@ -491,7 +491,7 @@ Reglas:
         ) : <div className="w-8" />}
         <div className="flex-1 text-center">
           <h1 className="font-bold text-lg leading-none">splitr</h1>
-          <p className="text-blue-200 text-xs leading-none mt-0.5">divide tu boleta</p>
+          <p className="text-blue-200 text-xs leading-none mt-0.5">La cuenta, resuelta</p>
         </div>
         {step === "upload" && (billData || imageFiles.length > 0) ? (
           <button onClick={() => handleRefresh(billData ? () => setShowResetModal(true) : resetApp)}
