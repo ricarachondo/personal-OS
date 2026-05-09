@@ -171,8 +171,8 @@ Si no hay descripción o no puedes inferir, deja qty:0.` : "";
 }
 
 Reglas:
-- Precios en CLP, enteros sin separadores ni símbolos
-- Si qty > 1: unitPrice = subtotal / qty (redondea)
+- Todos los precios son enteros (pesos sin decimales). Si ves "1.990,00" o "1990.00" o "1,990.00" → 1990. Ignora separadores de miles y decimales, redondea siempre al entero más cercano
+- Si qty > 1: unitPrice = round(subtotal / qty)
 - Extrae TODOS los ítems sin excepción
 - consumoTotal = suma de todos los subtotales
 - mySelection.qty por defecto: igual al qty del ítem (pre-seleccionar todo)
