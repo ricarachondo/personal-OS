@@ -489,21 +489,9 @@ Reglas:
             <ArrowLeft className="w-5 h-5" />
           </button>
         ) : <div className="w-8" />}
-        <div className="flex-1 flex flex-col items-center gap-2">
-          {/* LOGO PREVIEW — TEMPORAL */}
-          <div className="flex gap-4 items-center">
-            {[["#10B981","A"], ["#F97316","B"], ["#EF4444","C"]].map(([color, label]) => (
-              <div key={label} className="flex flex-col items-center gap-0.5">
-                <svg viewBox="0 0 80 96" fill="none" width="28" height="34">
-                  <path d="M 20,82 C 2,82 2,48 40,48" stroke="white" strokeWidth="16" strokeLinecap="round"/>
-                  <path d="M 40,48 C 78,48 78,14 60,14" stroke={color} strokeWidth="16" strokeLinecap="round"/>
-                  <circle cx="40" cy="48" r="9" fill="#1d4ed8"/>
-                </svg>
-                <span className="text-blue-200 text-xs font-bold">{label}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-blue-200 text-xs">¿A, B o C?</p>
+        <div className="flex-1 text-center">
+          <h1 className="font-bold text-lg leading-none">splitr</h1>
+          <p className="text-blue-200 text-xs leading-none mt-0.5">divide tu boleta</p>
         </div>
         {step === "upload" && (billData || imageFiles.length > 0) ? (
           <button onClick={() => handleRefresh(billData ? () => setShowResetModal(true) : resetApp)}
