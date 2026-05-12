@@ -13,6 +13,13 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Server configuration error" });
   }
 
+  // ── Token auth ────────────────────────────────────────────────────────────
+  const expectedToken = process.env.SPLITR_TOKEN?.trim();
+  const receivedToken = req.headers["x-splitr-token"]?.trim();
+  if (expectedToken && receivedToken !== expectedToken) {
+    return res.status(401).json({ error: "No autorizado." });
+  }
+
   // ── Input validation ─────────────────────────────────────────────────────
   const { images, prompt } = req.body ?? {};
 

@@ -180,7 +180,10 @@ Reglas:
 
       const response = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-splitr-token": import.meta.env.VITE_SPLITR_TOKEN || "",
+        },
         body: JSON.stringify({ images, prompt }),
       });
 
