@@ -1,5 +1,5 @@
 // v6 - single upload button + mic input
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Camera, ArrowLeft, Check, Plus, Minus, Home, X, FileImage, Images, Share2, Mic, RefreshCw } from "lucide-react";
 
 const formatCLP = (n) => "$" + Math.round(n).toLocaleString("es-CL");
@@ -25,6 +25,11 @@ export default function App() {
   const [mounted, setMounted] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Reset scroll position on every step change — fixes iOS Safari fixed-nav bug
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [step]);
 
   const handleRefresh = (action) => {
     setRefreshing(true);
