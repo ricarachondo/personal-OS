@@ -122,9 +122,3 @@ splitr-boleta/
 - Solo se aceptan imágenes (`image/jpeg`, `image/png`, `image/gif`, `image/webp`)
 
 ---
-
-## Decisiones técnicas
-
-- **Claude Sonnet en vez de Haiku** — Haiku alucinaba ítems y precios en pruebas reales. Sonnet tiene precisión OCR significativamente mejor.
-- **Vercel serverless en vez de llamada directa desde el cliente** — Para nunca exponer la API key de Anthropic en el browser.
-- **Token compartido en vez de auth real** — App de uso personal/casual. Un sistema OAuth completo sería overkill.
